@@ -81,7 +81,7 @@ html, body {
 .btn-calculator {
   border: none;
   outline: 0 none !important;
-  width: 100%;
+  width: 80%;
   height: 30px;
   line-height: 0;
   color: #BAC7D3 !important;

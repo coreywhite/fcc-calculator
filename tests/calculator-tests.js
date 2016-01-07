@@ -93,7 +93,34 @@ QUnit.module("Calculator Input Sequences", function(hooks) {
       assert.strictEqual(display.text, "-100", "Entry of negative numbers works correctly");
     });
 
+    QUnit.test("Plus/Minus Entry with Decimals", function(assert) {
+      assert.expect(1);
+      this.calc.Command("+/-");
+      this.calc.Command("3");
+      this.calc.Command(".");
+      this.calc.Command("1");
+      this.calc.Command("4");
+      this.calc.Command("1");
+      this.calc.Command("5");
+      this.calc.Command("9");
+      assert.strictEqual(display.text, "-3.14159", "Entry of negative numbers with decimals works");
+    });
 
+    QUnit.test("Clear Entry", function(assert) {
+      assert.expect(1);
+      this.calc.Command("1");
+      this.calc.Command("0");
+      this.calc.Command("CE");
+      assert.strictEqual(display.text, "0", "0 after clearing entry");
+    });
+
+    QUnit.test("Clear", function(assert) {
+      assert.expect(1);
+      this.calc.Command("1");
+      this.calc.Command("0");
+      this.calc.Command("C");
+      assert.strictEqual(display.text, "0", "0 after clearing");
+    });
 
   });
 

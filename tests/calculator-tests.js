@@ -234,9 +234,9 @@ QUnit.module("Calculator Input Sequences", function(hooks) {
 
   });
 
-  QUnit.module("Binary Operator Chains", function(hooks) {
-    //Demonstrate simple operator chaining and two digit display
-    QUnit.test("Test 1 + 2 + 3 + 4 =", function(assert) {
+  QUnit.module("Multiple Operator Chains", function(hooks) {
+
+    QUnit.test("Chained addition: 1 + 2 + 3 + 4 =", function(assert) {
       assert.expect(8);
       this.calc.Command("1");
       assert.strictEqual(display.text, "1", "Enter 1, display 1");
@@ -254,6 +254,106 @@ QUnit.module("Calculator Input Sequences", function(hooks) {
       assert.strictEqual(display.text, "4", "Enter 4, display 4");
       this.calc.Command("=");
       assert.strictEqual(display.text, "10", "Enter =, display 10");
+    });
+
+    QUnit.test("Chained subtraction: 1 - 2 - 3 - 4 =", function(assert) {
+      assert.expect(8);
+      this.calc.Command("1");
+      assert.strictEqual(display.text, "1", "Enter 1, display 1");
+      this.calc.Command("-");
+      assert.strictEqual(display.text, "1", "Enter -, display 1");
+      this.calc.Command("2");
+      assert.strictEqual(display.text, "2", "Enter 2, display 2");
+      this.calc.Command("-");
+      assert.strictEqual(display.text, "-1", "Enter -, display -1");
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("-");
+      assert.strictEqual(display.text, "-4", "Enter -, display -4");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "-8", "Enter =, display -8");
+    });
+
+    QUnit.test("Chained multiplication: 1 * 2 * 3 * 4 =", function(assert) {
+      assert.expect(8);
+      this.calc.Command("1");
+      assert.strictEqual(display.text, "1", "Enter 1, display 1");
+      this.calc.Command("*");
+      assert.strictEqual(display.text, "1", "Enter *, display 1");
+      this.calc.Command("2");
+      assert.strictEqual(display.text, "2", "Enter 2, display 2");
+      this.calc.Command("*");
+      assert.strictEqual(display.text, "2", "Enter *, display 2");
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("*");
+      assert.strictEqual(display.text, "6", "Enter *, display 6");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "24", "Enter =, display 24");
+    });
+
+    QUnit.test("Chained division: 1 / 2 / 3 / 4 =", function(assert) {
+      assert.expect(8);
+      this.calc.Command("1");
+      assert.strictEqual(display.text, "1", "Enter 1, display 1");
+      this.calc.Command("/");
+      assert.strictEqual(display.text, "1", "Enter /, display 1");
+      this.calc.Command("2");
+      assert.strictEqual(display.text, "2", "Enter 2, display 2");
+      this.calc.Command("/");
+      assert.strictEqual(display.text, "0.5", "Enter /, display 0.5");
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("/");
+      assert.strictEqual(display.text, "0.1666667", "Enter /, display 0.1666667");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "0.0416667", "Enter =, display 0.0416667");
+    });
+
+    QUnit.test("Operator overwriting: 4 - + 3 =", function(assert) {
+      assert.expect(1);
+      this.calc.Command("4");
+      this.calc.Command("-");
+      this.calc.Command("+");
+      this.calc.Command("3");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "7", "Display 7");
+    });
+
+    QUnit.test("Operator overwriting: 4 + - 3 =", function(assert) {
+      assert.expect(1);
+      this.calc.Command("4");
+      this.calc.Command("+");
+      this.calc.Command("-");
+      this.calc.Command("3");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "1", "Display 1");
+    });
+
+    QUnit.test("Operator overwriting: 4 / * 3 =", function(assert) {
+      assert.expect(1);
+      this.calc.Command("4");
+      this.calc.Command("/");
+      this.calc.Command("*");
+      this.calc.Command("3");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "12", "Display 12");
+    });
+
+    QUnit.test("Operator overwriting: 4 * / 3 =", function(assert) {
+      assert.expect(1);
+      this.calc.Command("4");
+      this.calc.Command("*");
+      this.calc.Command("/");
+      this.calc.Command("3");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "1.3333333", "Display 1.3333333");
     });
   });
 });

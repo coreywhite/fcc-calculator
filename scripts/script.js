@@ -92,16 +92,16 @@ Calculator.prototype.Command = function(action) {
       break;
 
     //Handle numeric entries:
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-    case 9:
+    case "0":
+    case "1":
+    case "2":
+    case "3":
+    case "4":
+    case "5":
+    case "6":
+    case "7":
+    case "8":
+    case "9":
     case ".":
       if(!this.displayEditable) {
         this.ClearDisplay();
@@ -171,7 +171,7 @@ $(document).ready(function() {
 
   //Bind button clicks to calculator commands
   $(".btn-calculator").click(function() {
-    console.log($(this).data("action"));
-    calc.Command($(this).data("action"));
+    console.log($(this).attr("data-action"));
+    calc.Command($(this).attr("data-action"));
   });
 });

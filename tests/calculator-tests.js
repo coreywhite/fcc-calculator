@@ -471,6 +471,153 @@ QUnit.module("Calculator Input Sequences", function(hooks) {
       this.calc.Command("=");
       assert.strictEqual(display.text, "1.7777776", "Enter =, display 1.7777776");
     });
+  });
+
+  QUnit.module("Equals Operator", function(hooks) {
+
+    QUnit.test("=", function(assert) {
+      assert.expect(1);
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "0", "Enter =, display 0");
+    });
+
+    QUnit.test("1 =", function(assert) {
+      assert.expect(2);
+      this.calc.Command("1");
+      assert.strictEqual(display.text, "1", "Enter 1, display 1");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "1", "Enter =, display 1");
+    });
+
+    QUnit.test("Repeated equals - addition: 3 + 4 = = =", function(assert) {
+      assert.expect(6);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("+");
+      assert.strictEqual(display.text, "3", "Enter +, display 3");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "7", "Enter =, display 7");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "11", "Enter =, display 11");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "15", "Enter =, display 15");
+    });
+
+    QUnit.test("Repeated equals - subtraction: 3 - 4 = = =", function(assert) {
+      assert.expect(6);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("-");
+      assert.strictEqual(display.text, "3", "Enter -, display 3");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "-1", "Enter =, display -1");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "-5", "Enter =, display -5");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "-9", "Enter =, display -9");
+    });
+
+    QUnit.test("Repeated equals - multiplication: 3 * 4 = = =", function(assert) {
+      assert.expect(6);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("*");
+      assert.strictEqual(display.text, "3", "Enter *, display 3");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "12", "Enter =, display 12");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "36", "Enter =, display 36");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "108", "Enter =, display 108");
+    });
+
+    QUnit.test("Repeated equals - division: 3 / 4 = = =", function(assert) {
+      assert.expect(6);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("/");
+      assert.strictEqual(display.text, "3", "Enter /, display 3");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "0.75", "Enter =, display 0.75");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "0.1875", "Enter =, display 0.1875");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "0.046875", "Enter =, display 0.046875");
+    });
+
+
+    QUnit.test("Repeated equals after addition: 3 + 4 + = =", function(assert) {
+      assert.expect(6);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("+");
+      assert.strictEqual(display.text, "3", "Enter +, display 3");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("+");
+      assert.strictEqual(display.text, "7", "Enter +, display 7");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "11", "Enter =, display 11");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "18", "Enter =, display 18");
+    });
+
+    QUnit.test("Repeated equals after subtraction: 3 - 4 - = =", function(assert) {
+      assert.expect(6);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("-");
+      assert.strictEqual(display.text, "3", "Enter -, display 3");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("-");
+      assert.strictEqual(display.text, "-1", "Enter -, display -1");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "5", "Enter =, display 5");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "6", "Enter =, display 6");
+    });
+
+    QUnit.test("Repeated equals after multiplication: 3 * 4 * = =", function(assert) {
+      assert.expect(6);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("*");
+      assert.strictEqual(display.text, "3", "Enter *, display 3");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("*");
+      assert.strictEqual(display.text, "12", "Enter *, display 12");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "144", "Enter =, display 144");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "1728", "Enter =, display 1728");
+    });
+
+    QUnit.test("Repeated equals after division: 3 / 4 / = =", function(assert) {
+      assert.expect(6);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("/");
+      assert.strictEqual(display.text, "3", "Enter /, display 3");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("/");
+      assert.strictEqual(display.text, "0.75", "Enter /, display 0.75");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "1.3333333", "Enter =, display 1.3333333");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "1.7777777", "Enter =, display 1.7777777");
+    });
 
   });
+
 });

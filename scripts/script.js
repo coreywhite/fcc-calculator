@@ -152,7 +152,7 @@ Calculator.prototype.Command = function(action) {
     case "sqrt":
       var result = Math.sqrt(this.getValue())
       result = Number(result.toFixed(this.maxDigits).slice(0, -1));
-      this.setValue(result);      
+      this.setValue(result);
       this.needsOperand = false;
       this.displayEditable = false;
       break;
@@ -165,7 +165,7 @@ Calculator.prototype.Command = function(action) {
     case "-":
       if(typeof opFunc === "undefined"){var opFunc = function(a, b) {return a - b;};}
     case "*":
-      if(typeof opFunc === "undefined"){var opFunc = function(a, b) {return a * b;};}
+      if(typeof opFunc === "undefined"){var opFunc = function(a, b) {return b * a;};}
     case "/":
       if(typeof opFunc === "undefined"){var opFunc = function(a, b) {return a / b;};}
       if(!this.needsOperand) {

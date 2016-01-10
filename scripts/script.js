@@ -99,7 +99,9 @@ Calculator.prototype.ClearDisplay = function() {
 //Function to execute the current operation
 Calculator.prototype.Calculate = function() {
   var result = this.curOperation(this.storedValue, this.getValue());
-  this.setValue(Number(result.toFixed(this.maxDigits).slice(0, -1)));
+  //Truncate result based on maximum digits
+  result = Number(result.toFixed(this.maxDigits).slice(0, -1));
+  this.setValue(result);
   this.displayEditable = false;
   return result;
 }
@@ -148,7 +150,9 @@ Calculator.prototype.Command = function(action) {
       this.isNegative = !this.isNegative;
       break;
     case "sqrt":
-      this.setValue(Math.sqrt(this.getValue()));
+      var result = Math.sqrt(this.getValue())
+      result = Number(result.toFixed(this.maxDigits).slice(0, -1));
+      this.setValue(result);      
       this.needsOperand = false;
       this.displayEditable = false;
       break;

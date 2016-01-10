@@ -1,8 +1,16 @@
 var display = {text: ""};
 
 QUnit.test("Calculator Object Creation", function( assert ) {
-  var calc = new Calculator(8, function(displayString) {
-    $("#display").text(displayString);
+  calc = new Calculator(8, function(digitsArray, decimalOffset, isNeg, isErr) {
+    if (isErr) {
+      var displayString = "Err"
+    } else {
+      var displayString = isNeg ? "-" : "";
+      displayString += digitsArray.slice(0, decimalOffset).join('');
+      displayString += '<span class="decimal">.</span>';
+      displayString += digitsArray.slice(decimalOffset, digitsArray.length).join('');
+    }
+    $("#display").html(displayString);
   });
   assert.notEqual(typeof calc, "undefined", "A Calculator object can be created.");
 });
@@ -16,6 +24,22 @@ QUnit.module("Calculator Input Sequences", function(hooks) {
     this.calc = new Calculator(8, function(displayString) {
       display.text = displayString;
     });
+
+    this.calc = new Calculator(8, function(digitsArray, decimalOffset, isNeg, isErr) {
+      if (isErr) {
+        var displayString = "Err"
+      } else {
+        var displayString = isNeg ? "-" : "";
+        displayString += digitsArray.slice(0, decimalOffset).join('');
+        if (decimalOffset < digitsArray.length) {
+          displayString += '.';
+          displayString += digitsArray.slice(decimalOffset, digitsArray.length).join('');          
+        }
+      }
+      display.text = displayString;
+    });
+
+
   });
 
   QUnit.module("Numeric Entry", function(hooks) {

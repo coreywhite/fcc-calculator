@@ -6,72 +6,97 @@ var Calculator = function (maxDigits, displayCallback) {
   this.needsOperand = false;
   this.displayEditable = true;
 
-  //Track the calculator's current value and display string.
-  //These are private member variables to keep them tied together.
-  var _value = 0;
-  var _display = "";
-  this.getDisplayString = function() {return _display;};
-  this.getValue = function() {return _value;};
+  var digits = [0];
+  var decimalOffset;
+  this.isError = false;
+  this.isNegative = false;
 
-  //Helper method to set the value, as long as the number fits in the display.
-  this.setValue = function(val) {
-    var valSize = Math.round(Math.abs(val)).toString(10).length;
-    if(isNaN(val)) {
-      _value = NaN;
-      _display = "ERR";
-      return _value;
-    } else if(valSize <= this.maxDigits) {
-      _value = val;
-      var charsToDisplay  = this.maxDigits;
-      charsToDisplay += (_value < 0) ? 1 : 0;
-      charsToDisplay += (_value != Math.round(_value) && valSize < this.maxDigits) ? 1 : 0;
-      _display = val.toString(10).substring(0, charsToDisplay);
-      return _value;
-    } else {
+  this.initState = function() {
+    digits = [0];
+    decimalOffset = (function () { return; })();
+    this.isNegative = false;
+    this.isError = false;
+  }
+
+  //Attempt to set the current display value
+  this.setValue = function(newVal) {
+    //Check for a valid value
+    if (typeof newVal !== "number" || isNaN(newVal)
+      || Math.abs(newVal) >= Math.pow(10, this.maxDigits) ) {
+      this.isError = true;
       return false;
     }
+    this.isNegative = (newVal < 0);
+    newVal = Math.abs(newVal);
+    //Find the length of the number before the decimal point
+    decimalOffset = newVal.toFixed().length;
+    //Get value as string, limiting to no more than maxDigits characters
+    var valAsString = newVal.toString(10).replace(/\D/g,'')
+    //Split the first maxDigit characters of the string into an integer array
+    digits = valAsString.substr(0, this.maxDigits).split('').map(Number);
+    return typeof digits === "object";
   };
 
-  //Helper method to set the display string to an integer and update the value
-  this.setDisplayString = function(str) {
-    if(str.length <= this.maxDigits && !isNaN(parseInt(str, 10))) {
-      _value = parseInt(str, 10);
-      _display = str;
-      return _display;
-    } else if(str === "") {
-      _value = 0;
-      _display = str;
-      return _display;
-    } else {
+  //Convert the current display to a numeric value and return it
+  this.getValue = function() {
+    var retVal = 0;
+    //Determine decimal offset to use (default to after the number if none set)
+    var offset = decimalOffset || digits.length;
+    //Convert digits to base 10 number
+    for (var i = 0; i < digits.length; i++) {
+      retVal += digits[i] * Math.pow(10, offset - i - 1);
+    }
+    //Make negative if required
+    if(this.isNegative) {
+      retVal *= -1;
+    }
+    return retVal;
+  };
+
+  //Attempt to add a decimal place to the current display value
+  this.addDecimal = function() {
+    //Check that decimalOffset has not already been set.
+    if(typeof decimalOffset !== "undefined") {
       return false;
     }
+    decimalOffset = digits.length;
+    return true;
   };
+
+  //Attempt to add a digit to the current display value
+  this.addDigit = function(digit) {
+    //Check for invalid digit parameter
+    if(digit !== parseInt(digit) || digit < 0 || digit > 9) {
+      return false;
+    }
+    //Check if already at or exceeding maximum number of digits
+    if(digits.length >= this.maxDigits){
+      return false;
+    }
+    //Zero requires special handling when there is no set decimal point
+    if(digits[0] === 0 && typeof decimalOffset === "undefined"){
+      digits[0] = digit;
+    } else {
+      digits.push(digit);
+    }
+    return true;
+  };
+
+  //Update the display
+  this.Display = function() {
+    this.displayCallback(digits, decimalOffset || digits.length, this.isNegative, this.isError);
+  };
+
 };
 
-//Update the display
-Calculator.prototype.Display = function() {
-  this.displayCallback(this.getDisplayString());
-};
-
-//Clear the display
+//Function to clear the display
 Calculator.prototype.ClearDisplay = function() {
-  this.setDisplayString('');
+  this.initState();
   this.displayEditable = true;
 };
 
-//Add a digit or decimal place
-Calculator.prototype.AddDigit = function(digit) {
-  if(!isNaN(parseInt(digit, 10))) {
-    this.setDisplayString(this.getDisplayString() + digit);
-  } else if(digit === "." && this.getDisplayString().indexOf('.') == -1){
-    this.setDisplayString(this.getDisplayString() + digit);
-  } else {
-    return false;
-  }
-  return true;
-};
 
-//Replace the current value with the result of the current function
+//Function to execute the current operation
 Calculator.prototype.Calculate = function() {
   var result = this.curOperation(this.storedValue, this.getValue());
   this.setValue(result);
@@ -102,18 +127,25 @@ Calculator.prototype.Command = function(action) {
     case "7":
     case "8":
     case "9":
+      if(!this.displayEditable) {
+        this.ClearDisplay();
+      }
+      this.needsOperand = false;
+      this.addDigit(parseInt(action));
+      break;
+
     case ".":
       if(!this.displayEditable) {
         this.ClearDisplay();
       }
       this.needsOperand = false;
-      this.AddDigit(action);
+      this.addDecimal()
       break;
 
     //Handle unary operations:
     case "+/-":
       this.needsOperand = false;
-      this.setValue(this.getValue() * -1);
+      this.isNegative = !this.isNegative;
       break;
     case "sqrt":
       this.setValue(Math.sqrt(this.getValue()));
@@ -137,7 +169,6 @@ Calculator.prototype.Command = function(action) {
         this.needsOperand = true;
       }
       this.curOperation = opFunc;
-      //this.curFunction = (function() {return function(val) {return opFunc(_val, val);};})();
       break;
 
     //Handle equality:
@@ -162,9 +193,16 @@ Calculator.prototype.Command = function(action) {
 //*********************************************************************
 $(document).ready(function() {
 
-  //Create object for the calculator
-  calc = new Calculator(8, function(displayString) {
-    $("#display").text(displayString);
+  calc = new Calculator(8, function(digitsArray, decimalOffset, isNeg, isErr) {
+    if (isErr) {
+      var displayString = "Err"
+    } else {
+      var displayString = isNeg ? "-" : "";
+      displayString += digitsArray.slice(0, decimalOffset).join('');
+      displayString += '<span class="decimal">.</span>';
+      displayString += digitsArray.slice(decimalOffset, digitsArray.length).join('');
+    }
+    $("#display").html(displayString);
   });
 
   calc.Display();

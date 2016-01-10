@@ -29,7 +29,7 @@ var Calculator = function (maxDigits, displayCallback) {
     this.isNegative = (newVal < 0);
     newVal = Math.abs(newVal);
     //Find the length of the number before the decimal point
-    decimalOffset = newVal.toFixed().length;
+    decimalOffset = newVal.toFixed(this.maxDigits).indexOf('.');
     //Get value as string, limiting to no more than maxDigits characters
     var valAsString = newVal.toString(10).replace(/\D/g,'')
     //Split the first maxDigit characters of the string into an integer array
@@ -99,7 +99,7 @@ Calculator.prototype.ClearDisplay = function() {
 //Function to execute the current operation
 Calculator.prototype.Calculate = function() {
   var result = this.curOperation(this.storedValue, this.getValue());
-  this.setValue(result);
+  this.setValue(Number(result.toFixed(this.maxDigits).slice(0, -1)));
   this.displayEditable = false;
   return result;
 }

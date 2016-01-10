@@ -33,7 +33,7 @@ QUnit.module("Calculator Input Sequences", function(hooks) {
         displayString += digitsArray.slice(0, decimalOffset).join('');
         if (decimalOffset < digitsArray.length) {
           displayString += '.';
-          displayString += digitsArray.slice(decimalOffset, digitsArray.length).join('');          
+          displayString += digitsArray.slice(decimalOffset, digitsArray.length).join('');
         }
       }
       display.text = displayString;
@@ -71,15 +71,15 @@ QUnit.module("Calculator Input Sequences", function(hooks) {
       this.calc.Command("7");
       this.calc.Command("8");
       this.calc.Command("9");
-      assert.strictEqual(display.text, "12345678", "Display first 8 digits");
+      assert.strictEqual(display.text, "12345678", "Enter 123456789, display 12345678");
     });
 
     QUnit.test("Multiple Zero Entry Restriction", function(assert) {
       assert.expect(2);
       this.calc.Command("0");
-      assert.strictEqual(display.text, "0", "Enter 0, Display 0");
+      assert.strictEqual(display.text, "0", "Enter 0, display 0");
       this.calc.Command("0");
-      assert.strictEqual(display.text, "0", "Only one zero should be displayed");
+      assert.strictEqual(display.text, "0", "Enter 0, display 0");
     });
 
     QUnit.test("Decimal Entry", function(assert) {
@@ -111,10 +111,10 @@ QUnit.module("Calculator Input Sequences", function(hooks) {
       this.calc.Command("0");
       this.calc.Command("+/-");
       this.calc.Command("+/-");
-      assert.strictEqual(display.text, "10", "Entry of negative numbers works correctly");
+      assert.strictEqual(display.text, "10", "Enter 10 +/- +/-, display 10");
       this.calc.Command("+/-");
       this.calc.Command("0");
-      assert.strictEqual(display.text, "-100", "Entry of negative numbers works correctly");
+      assert.strictEqual(display.text, "-100", "Enter +/- 0, display -100");
     });
 
     QUnit.test("Plus/Minus Entry with Decimals", function(assert) {
@@ -127,7 +127,7 @@ QUnit.module("Calculator Input Sequences", function(hooks) {
       this.calc.Command("1");
       this.calc.Command("5");
       this.calc.Command("9");
-      assert.strictEqual(display.text, "-3.14159", "Entry of negative numbers with decimals works");
+      assert.strictEqual(display.text, "-3.14159", "Enter +/- 3.14159, display -3.14159");
     });
 
     QUnit.test("Clear Entry", function(assert) {

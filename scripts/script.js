@@ -5,11 +5,10 @@ var Calculator = function (maxDigits, displayCallback) {
   this.curOperation = function(a, b) {return b;};
   this.needsOperand = false;
   this.displayEditable = true;
-
-  var digits = [0];
-  var decimalOffset;
   this.isError = false;
   this.isNegative = false;
+  var digits = [0];
+  var decimalOffset;
 
   this.initState = function() {
     digits = [0];
@@ -36,6 +35,8 @@ var Calculator = function (maxDigits, displayCallback) {
     digits = valAsString.substr(0, this.maxDigits).split('').map(Number);
     return typeof digits === "object";
   };
+
+
 
   //Convert the current display to a numeric value and return it
   this.getValue = function() {
@@ -95,16 +96,18 @@ Calculator.prototype.ClearDisplay = function() {
   this.displayEditable = true;
 };
 
+//Function to truncate a value
+Calculator.prototype.GetTruncatedValue = function(value) {
+  return Number(value.toFixed(this.maxDigits).slice(0, -1));
+};
 
 //Function to execute the current operation
 Calculator.prototype.Calculate = function() {
-  var result = this.curOperation(this.storedValue, this.getValue());
-  //Truncate result based on maximum digits
-  result = Number(result.toFixed(this.maxDigits).slice(0, -1));
+  var result = this.GetTruncatedValue(this.curOperation(this.storedValue, this.getValue()));
   this.setValue(result);
   this.displayEditable = false;
   return result;
-}
+};
 
 //Send the calculator a command
 Calculator.prototype.Command = function(action) {
@@ -150,9 +153,7 @@ Calculator.prototype.Command = function(action) {
       this.isNegative = !this.isNegative;
       break;
     case "sqrt":
-      var result = Math.sqrt(this.getValue())
-      result = Number(result.toFixed(this.maxDigits).slice(0, -1));
-      this.setValue(result);
+      this.setValue(this.GetTruncatedValue(Math.sqrt(this.getValue())));
       this.needsOperand = false;
       this.displayEditable = false;
       break;

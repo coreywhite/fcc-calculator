@@ -1,13 +1,13 @@
 var Calculator = function (maxDigits, displayCallback) {
   this.maxDigits = maxDigits;
   this.displayCallback = displayCallback;
-  this.storedValue = 0;
-  this.curOperation = function(a, b) {return b;};
+  this.storedVal = 0;
+  this.curOp = null;
+  this.equalOp = function(val) {return val;};
   this.needsOperand = false;
-  this.displayEditable = true;
+  this.allowAppend = true;
   this.isError = false;
   this.isNegative = false;
-  this.lastOp = null;
   var digits = [0];
   var decimalOffset;
 
@@ -34,12 +34,11 @@ var Calculator = function (maxDigits, displayCallback) {
     var valAsString = newVal.toString(10).replace(/\D/g,'')
     //Split the first maxDigit characters of the string into an integer array
     digits = valAsString.substr(0, this.maxDigits).split('').map(Number);
-    return typeof digits === "object";
+    this.allowAppend = false;
+    return (typeof digits === "object");
   };
 
-
-
-  //Convert the current display to a numeric value and return it
+  //Convert the current display digits to a numeric value and return it
   this.getValue = function() {
     var retVal = 0;
     //Determine decimal offset to use (default to after the number if none set)
@@ -94,7 +93,7 @@ var Calculator = function (maxDigits, displayCallback) {
 //Function to clear the display
 Calculator.prototype.ClearDisplay = function() {
   this.initState();
-  this.displayEditable = true;
+  this.allowAppend = true;
 };
 
 //Function to truncate a value
@@ -102,33 +101,62 @@ Calculator.prototype.GetTruncatedValue = function(value) {
   return Number(value.toFixed(this.maxDigits).slice(0, -1));
 };
 
-Calculator.prototype.BinaryOperation = function(op) {
-  if(!this.needsOperand) {
-    this.storedValue = this.Calculate();
-    this.needsOperand = true;
-  }
-  switch (op) {
+
+Calculator.prototype.ExecuteBinaryOp = function() {
+  var stored = this.storedVal;
+  var cur = this.GetTruncatedValue(this.getValue());
+  switch (this.curOp) {
     case "+":
-      this.curOperation = function(a, b) {return a + b;};
+      var result = stored + cur;
+      this.equalOp = function(val) {return val + cur;};
       break;
     case "-":
-      this.curOperation = function(a, b) {return a - b;};
+      var result = stored - cur;
+      this.equalOp = function(val) {return val - cur;};
       break;
     case "*":
-      this.curOperation = function(a, b) {return a * b;};
+      var result = stored * cur;
+      this.equalOp = function(val) {return stored * val;};
       break;
     case "/":
-      this.curOperation = function(a, b) {return a / b;};
+      var result = stored / cur;
+      this.equalOp = function(val) {return val + cur;};
       break;
+    default:
+      return false;
   }
-  this.lastOp = op;
+  this.storedVal = this.GetTruncatedValue(result);
+  this.setValue(this.storedVal);
+  this.curOp = null;
 };
+//
+// Calculator.prototype.BinaryOperation = function(op) {
+//   if(!this.needsOperand) {
+//     this.storedVal = this.Calculate();
+//     this.needsOperand = true;
+//   }
+//   switch (op) {
+//     case "+":
+//       this.curOperation = function(a, b) {return a + b;};
+//       break;
+//     case "-":
+//       this.curOperation = function(a, b) {return a - b;};
+//       break;
+//     case "*":
+//       this.curOperation = function(a, b) {return a * b;};
+//       break;
+//     case "/":
+//       this.curOperation = function(a, b) {return a / b;};
+//       break;
+//   }
+//   this.lastOp = op;
+// };
 
 //Function to execute the current operation
 Calculator.prototype.Calculate = function() {
-  var result = this.GetTruncatedValue(this.curOperation(this.storedValue, this.getValue()));
+  var result = this.GetTruncatedValue(this.curOperation(this.storedVal, this.getValue()));
   this.setValue(result);
-  this.displayEditable = false;
+  this.allowAppend = false;
   return result;
 };
 
@@ -138,8 +166,8 @@ Calculator.prototype.Command = function(action) {
 
     //Handle clears:
     case 'C':
-      this.curOperation = function(a, b) {return b;};
-      this.storedValue = 0;
+      this.curOp = null;
+      this.storedVal = 0;
     case 'CE':
       this.ClearDisplay();
       break;
@@ -155,19 +183,21 @@ Calculator.prototype.Command = function(action) {
     case "7":
     case "8":
     case "9":
-      if(!this.displayEditable) {
+      if(!this.allowAppend) {
         this.ClearDisplay();
       }
-      this.needsOperand = false;
       this.addDigit(parseInt(action));
+      this.allowAppend = true;
+      this.needsOperand = false;
       break;
 
     case ".":
-      if(!this.displayEditable) {
+      if(!this.allowAppend) {
         this.ClearDisplay();
       }
-      this.needsOperand = false;
       this.addDecimal()
+      this.allowAppend = true;
+      this.needsOperand = false;
       break;
 
     //Handle unary operations:
@@ -178,7 +208,7 @@ Calculator.prototype.Command = function(action) {
     case "sqrt":
       this.setValue(this.GetTruncatedValue(Math.sqrt(this.getValue())));
       this.needsOperand = false;
-      this.displayEditable = false;
+      this.allowAppend = false;
       break;
 
     //Handle binary operators. If the calculator currently needs an operand,
@@ -188,21 +218,23 @@ Calculator.prototype.Command = function(action) {
     case "-":
     case "*":
     case "/":
-      this.BinaryOperation(action);
+      if(this.curOp === null) {
+        this.storedVal = this.getValue();
+      } else if (!this.needsOperand) {
+        this.ExecuteBinaryOp();
+      }
+      this.needsOperand = true;
+      this.curOp = action;
+      this.allowAppend = false;
       break;
 
     //Handle equality:
     case "=":
-      //Store a function to repeat the current operation with the current value
-      var repeatOperation = (function(op, curVal) {
-        var closureVal = this.lastOp == "*" ? this.storedVal : curVal;
-        return function(a, b) {
-          return op(a, closureVal);
-        };
-      })(this.curOperation, this.getValue());
-      this.storedValue = this.Calculate();
-      this.curOperation = repeatOperation;
-      this.needsOperand = true;
+      if (this.curOp) {
+        this.ExecuteBinaryOp();
+      } else {
+        this.setValue(this.GetTruncatedValue(this.equalOp(this.getValue())));
+      }
       break;
   }
   this.Display();

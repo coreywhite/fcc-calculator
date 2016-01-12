@@ -120,7 +120,7 @@ Calculator.prototype.ExecuteBinaryOp = function() {
       break;
     case "/":
       var result = stored / cur;
-      this.equalOp = function(val) {return val + cur;};
+      this.equalOp = function(val) {return val / cur;};
       break;
     default:
       return false;

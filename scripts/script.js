@@ -7,6 +7,7 @@ var Calculator = function (maxDigits, displayCallback) {
   this.displayEditable = true;
   this.isError = false;
   this.isNegative = false;
+  this.lastOp = null;
   var digits = [0];
   var decimalOffset;
 
@@ -101,6 +102,28 @@ Calculator.prototype.GetTruncatedValue = function(value) {
   return Number(value.toFixed(this.maxDigits).slice(0, -1));
 };
 
+Calculator.prototype.BinaryOperation = function(op) {
+  if(!this.needsOperand) {
+    this.storedValue = this.Calculate();
+    this.needsOperand = true;
+  }
+  switch (op) {
+    case "+":
+      this.curOperation = function(a, b) {return a + b;};
+      break;
+    case "-":
+      this.curOperation = function(a, b) {return a - b;};
+      break;
+    case "*":
+      this.curOperation = function(a, b) {return a * b;};
+      break;
+    case "/":
+      this.curOperation = function(a, b) {return a / b;};
+      break;
+  }
+  this.lastOp = op;
+};
+
 //Function to execute the current operation
 Calculator.prototype.Calculate = function() {
   var result = this.GetTruncatedValue(this.curOperation(this.storedValue, this.getValue()));
@@ -162,26 +185,19 @@ Calculator.prototype.Command = function(action) {
     //repeated binary operators should replace the current operator without
     //calculating. Otherwise, perform the calculation with the current value.
     case "+":
-      var opFunc = function(a, b) {return a + b;};
     case "-":
-      if(typeof opFunc === "undefined"){var opFunc = function(a, b) {return a - b;};}
     case "*":
-      if(typeof opFunc === "undefined"){var opFunc = function(a, b) {return b * a;};}
     case "/":
-      if(typeof opFunc === "undefined"){var opFunc = function(a, b) {return a / b;};}
-      if(!this.needsOperand) {
-        this.storedValue = this.Calculate();
-        this.needsOperand = true;
-      }
-      this.curOperation = opFunc;
+      this.BinaryOperation(action);
       break;
 
     //Handle equality:
     case "=":
       //Store a function to repeat the current operation with the current value
       var repeatOperation = (function(op, curVal) {
+        var closureVal = this.lastOp == "*" ? this.storedVal : curVal;
         return function(a, b) {
-          return op(a, curVal);
+          return op(a, closureVal);
         };
       })(this.curOperation, this.getValue());
       this.storedValue = this.Calculate();

@@ -528,7 +528,7 @@ QUnit.module("Calculator Input Sequences", function(hooks) {
       this.calc.Command("3");
       assert.strictEqual(display.text, "3", "Enter 3, display 3");
       this.calc.Command("-");
-      assert.strictEqual(display.text, "3", "Enter *, display 3");
+      assert.strictEqual(display.text, "3", "Enter -, display 3");
       this.calc.Command("=");
       assert.strictEqual(display.text, "-3", "Enter =, display -3");
     });
@@ -780,6 +780,7 @@ QUnit.module("Calculator Input Sequences", function(hooks) {
       assert.strictEqual(display.text, "6.6666666", "Enter =, display 6.6666666");
       this.calc.Command("=");
       assert.strictEqual(display.text, "8.8888888", "Enter =, display 8.8888888");
+
     });
 
   });

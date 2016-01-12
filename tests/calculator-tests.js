@@ -513,6 +513,46 @@ QUnit.module("Calculator Input Sequences", function(hooks) {
       assert.strictEqual(display.text, "1", "Enter =, display 1");
     });
 
+    QUnit.test("Equals after binary operator: 3 + =", function(assert) {
+      assert.expect(3);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("+");
+      assert.strictEqual(display.text, "3", "Enter +, display 3");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "3", "Enter =, display 3");
+    });
+
+    QUnit.test("Equals after binary operator: 3 - =", function(assert) {
+      assert.expect(3);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("-");
+      assert.strictEqual(display.text, "3", "Enter *, display 3");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "-3", "Enter =, display -3");
+    });
+
+    QUnit.test("Equals after binary operator: 3 * =", function(assert) {
+      assert.expect(3);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("*");
+      assert.strictEqual(display.text, "3", "Enter *, display 3");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "9", "Enter =, display 9");
+    });
+
+    QUnit.test("Equals after binary operator: 3 / =", function(assert) {
+      assert.expect(3);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("/");
+      assert.strictEqual(display.text, "3", "Enter /, display 3");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "0.3333333", "Enter =, display 0.3333333");
+    });
+
     QUnit.test("Repeated equals - addition: 3 + 4 = = =", function(assert) {
       assert.expect(6);
       this.calc.Command("3");
@@ -640,6 +680,106 @@ QUnit.module("Calculator Input Sequences", function(hooks) {
       assert.strictEqual(display.text, "1.3333333", "Enter =, display 1.3333333");
       this.calc.Command("=");
       assert.strictEqual(display.text, "1.7777777", "Enter =, display 1.7777777");
+    });
+
+    QUnit.test("Divide displayed result into another number using =: {17} into 3", function(assert) {
+      assert.expect(8);
+      this.calc.Command("1");
+      assert.strictEqual(display.text, "1", "Enter 1, display 1");
+      this.calc.Command("0");
+      assert.strictEqual(display.text, "10", "Enter 0, display 10");
+      this.calc.Command("+");
+      assert.strictEqual(display.text, "10", "Enter +, display 10");
+      this.calc.Command("7");
+      assert.strictEqual(display.text, "7", "Enter 7, display 7");
+      this.calc.Command("/");
+      assert.strictEqual(display.text, "17", "Enter /, display 17");
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("/");
+      assert.strictEqual(display.text, "5.6666666", "Enter /, display 5.6666666");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "0.1764705", "Enter =, display 0.1764705");
+    });
+
+    QUnit.test("Binary operator chains with equals: 3 + 4 + = 5 = =", function(assert) {
+      assert.expect(8);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("+");
+      assert.strictEqual(display.text, "3", "Enter +, display 3");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("+");
+      assert.strictEqual(display.text, "7", "Enter +, display 7");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "11", "Enter =, display 11");
+      this.calc.Command("5");
+      assert.strictEqual(display.text, "5", "Enter 5, display 5");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "12", "Enter =, display 12");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "19", "Enter =, display 19");
+    });
+
+    QUnit.test("Binary operator chains with equals: 3 - 4 - = 5 = =", function(assert) {
+      assert.expect(8);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("-");
+      assert.strictEqual(display.text, "3", "Enter -, display 3");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("-");
+      assert.strictEqual(display.text, "-1", "Enter -, display -1");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "5", "Enter =, display 5");
+      this.calc.Command("5");
+      assert.strictEqual(display.text, "5", "Enter 5, display 5");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "6", "Enter =, display 6");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "7", "Enter =, display 7");
+    });
+
+    QUnit.test("Binary operator chains with equals: 3 * 4 * = 5 = =", function(assert) {
+      assert.expect(8);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("*");
+      assert.strictEqual(display.text, "3", "Enter *, display 3");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("*");
+      assert.strictEqual(display.text, "12", "Enter *, display 12");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "144", "Enter =, display 144");
+      this.calc.Command("5");
+      assert.strictEqual(display.text, "5", "Enter 5, display 5");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "60", "Enter =, display 60");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "720", "Enter =, display 720");
+    });
+
+    QUnit.test("Binary operator chains with equals: 3 / 4 / = 5 = =", function(assert) {
+      assert.expect(8);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("/");
+      assert.strictEqual(display.text, "3", "Enter /, display 3");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("/");
+      assert.strictEqual(display.text, "0.75", "Enter /, display 0.75");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "1.3333333", "Enter =, display 1.3333333");
+      this.calc.Command("5");
+      assert.strictEqual(display.text, "5", "Enter 5, display 5");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "6.6666666", "Enter =, display 6.6666666");
+      this.calc.Command("=");
+      assert.strictEqual(display.text, "8.8888888", "Enter =, display 8.8888888");
     });
 
   });

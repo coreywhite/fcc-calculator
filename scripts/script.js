@@ -3,7 +3,7 @@ var Calculator = function (maxDigits, displayCallback) {
   this.displayCallback = displayCallback;
   this.storedVal = 0;
   this.curOp = null;
-  this.equalOp = function(val) {return val;};
+  this.storedOp = function(val) {return val;};
   this.needsOperand = false;
   this.allowAppend = true;
   this.isError = false;
@@ -97,64 +97,53 @@ Calculator.prototype.ClearDisplay = function() {
 };
 
 //Function to truncate a value
-Calculator.prototype.GetTruncatedValue = function(value) {
+Calculator.prototype.Truncate = function(value) {
   return Number(value.toFixed(this.maxDigits).slice(0, -1));
 };
 
 
-Calculator.prototype.ExecuteBinaryOp = function() {
-  var stored = this.storedVal;
-  var cur = this.GetTruncatedValue(this.getValue());
+Calculator.prototype.ExecuteCurOp = function() {
+  var curVal = this.Truncate(this.getValue());
+  //Based on the operator, assign a default operand and operator function.
   switch (this.curOp) {
     case "+":
-      var result = stored + cur;
-      this.equalOp = function(val) {return val + cur;};
+      var operand = this.storedVal;
+      this.storedOp = function(val) {return val + curVal;};
       break;
     case "-":
-      var result = stored - cur;
-      this.equalOp = function(val) {return val - cur;};
+      var operand = this.storedVal;
+      this.storedOp = function(val) {return val - curVal;};
       break;
     case "*":
-      var result = stored * cur;
-      this.equalOp = function(val) {return stored * val;};
+      var operand = this.needsOperand ? curVal : this.storedVal;
+      this.storedOp = function(val) {return operand * val;};
       break;
     case "/":
-      var result = stored / cur;
-      this.equalOp = function(val) {return val / cur;};
+      var operand = this.needsOperand ? 1 : this.storedVal;
+      this.storedOp = function(val) {return val / curVal;};
       break;
     default:
       return false;
   }
-  this.storedVal = this.GetTruncatedValue(result);
-  this.setValue(this.storedVal);
+  //Apply the function and change the stored value. Multiplication must be
+  //handled differently because it stores the first operand rather than the
+  //second. So, e.g. "3 * 4 ="" stores "3 *"", whereas "3 + 4 ="" stores ""+ 4".
+  if (this.curOp === "*") {
+    var result = this.storedOp(curVal);
+    this.storedVal = operand;
+  } else {
+    var result = this.storedOp(operand);
+    this.storedVal = curVal;
+  }
+
+  this.setValue(this.Truncate(result));
   this.curOp = null;
 };
-//
-// Calculator.prototype.BinaryOperation = function(op) {
-//   if(!this.needsOperand) {
-//     this.storedVal = this.Calculate();
-//     this.needsOperand = true;
-//   }
-//   switch (op) {
-//     case "+":
-//       this.curOperation = function(a, b) {return a + b;};
-//       break;
-//     case "-":
-//       this.curOperation = function(a, b) {return a - b;};
-//       break;
-//     case "*":
-//       this.curOperation = function(a, b) {return a * b;};
-//       break;
-//     case "/":
-//       this.curOperation = function(a, b) {return a / b;};
-//       break;
-//   }
-//   this.lastOp = op;
-// };
+
 
 //Function to execute the current operation
 Calculator.prototype.Calculate = function() {
-  var result = this.GetTruncatedValue(this.curOperation(this.storedVal, this.getValue()));
+  var result = this.Truncate(this.curOperation(this.storedVal, this.getValue()));
   this.setValue(result);
   this.allowAppend = false;
   return result;
@@ -184,6 +173,7 @@ Calculator.prototype.Command = function(action) {
     case "8":
     case "9":
       if(!this.allowAppend) {
+        this.storedVal = this.getValue();
         this.ClearDisplay();
       }
       this.addDigit(parseInt(action));
@@ -193,6 +183,7 @@ Calculator.prototype.Command = function(action) {
 
     case ".":
       if(!this.allowAppend) {
+        this.storedVal = this.getValue();
         this.ClearDisplay();
       }
       this.addDecimal()
@@ -206,7 +197,7 @@ Calculator.prototype.Command = function(action) {
       this.isNegative = !this.isNegative;
       break;
     case "sqrt":
-      this.setValue(this.GetTruncatedValue(Math.sqrt(this.getValue())));
+      this.setValue(this.Truncate(Math.sqrt(this.getValue())));
       this.needsOperand = false;
       this.allowAppend = false;
       break;
@@ -218,22 +209,20 @@ Calculator.prototype.Command = function(action) {
     case "-":
     case "*":
     case "/":
-      if(this.curOp === null) {
-        this.storedVal = this.getValue();
-      } else if (!this.needsOperand) {
-        this.ExecuteBinaryOp();
+      if(this.curOp && !this.needsOperand){
+        this.ExecuteCurOp();
       }
-      this.needsOperand = true;
       this.curOp = action;
+      this.needsOperand = true;
       this.allowAppend = false;
       break;
 
     //Handle equality:
     case "=":
       if (this.curOp) {
-        this.ExecuteBinaryOp();
+        this.ExecuteCurOp();
       } else {
-        this.setValue(this.GetTruncatedValue(this.equalOp(this.getValue())));
+        this.setValue(this.Truncate(this.storedOp(this.getValue())));
       }
       break;
   }

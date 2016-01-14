@@ -11,7 +11,7 @@ var Calculator = function (maxDigits, displayCallback) {
   var digits = [0];
   var decimalOffset;
 
-  this.initState = function() {
+  this.initDisplayState = function() {
     digits = [0];
     decimalOffset = (function () { return; })();
     this.isNegative = false;
@@ -92,7 +92,7 @@ var Calculator = function (maxDigits, displayCallback) {
 
 //Function to clear the display
 Calculator.prototype.ClearDisplay = function() {
-  this.initState();
+  this.initDisplayState();
   this.allowAppend = true;
 };
 
@@ -156,6 +156,7 @@ Calculator.prototype.Command = function(action) {
     //Handle clears:
     case 'C':
       this.curOp = null;
+      this.storedOp = function(val) {return val;};
       this.storedVal = 0;
     case 'CE':
       this.ClearDisplay();

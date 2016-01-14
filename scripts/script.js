@@ -197,6 +197,9 @@ Calculator.prototype.Command = function(action) {
       this.isNegative = !this.isNegative;
       break;
     case "sqrt":
+      if (!this.allowAppend) {
+        this.storedVal = this.getValue();
+      }
       this.setValue(this.Truncate(Math.sqrt(this.getValue())));
       this.needsOperand = false;
       this.allowAppend = false;

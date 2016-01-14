@@ -459,7 +459,7 @@ QUnit.module("Calculator Input Sequences", function(hooks) {
       this.calc.Command("+");
       assert.strictEqual(display.text, "7", "Enter +, display 7");
       this.calc.Command("sqrt");
-      assert.strictEqual(display.text, "2.6457513", "Enter sqrt, display 5");
+      assert.strictEqual(display.text, "2.6457513", "Enter sqrt, display 2.6457513");
       this.calc.Command("=");
       assert.strictEqual(display.text, "9.6457513", "Enter =, display 9.6457513");
     });

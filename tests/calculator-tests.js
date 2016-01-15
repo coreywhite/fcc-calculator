@@ -785,4 +785,57 @@ QUnit.module("Calculator Input Sequences", function(hooks) {
 
   });
 
+  //Demonstrate operations with %
+  QUnit.module("Operators", function(hooks) {
+
+    QUnit.test("Addition with %", function(assert) {
+      assert.expect(4);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("+");
+      assert.strictEqual(display.text, "3", "Enter +, display 3");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("%");
+      assert.strictEqual(display.text, "3.12", "Enter %, display 3.12");
+    });
+
+    QUnit.test("Subtraction with %", function(assert) {
+      assert.expect(4);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("-");
+      assert.strictEqual(display.text, "3", "Enter -, display 3");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("%");
+      assert.strictEqual(display.text, "2.88", "Enter %, display 2.88");
+    });
+
+    QUnit.test("Multiplication with %", function(assert) {
+      assert.expect(4);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("*");
+      assert.strictEqual(display.text, "3", "Enter *, display 3");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("%");
+      assert.strictEqual(display.text, "0.12", "Enter %, display 0.12");
+    });
+
+    QUnit.test("Division with %", function(assert) {
+      assert.expect(4);
+      this.calc.Command("3");
+      assert.strictEqual(display.text, "3", "Enter 3, display 3");
+      this.calc.Command("/");
+      assert.strictEqual(display.text, "3", "Enter /, display 3");
+      this.calc.Command("4");
+      assert.strictEqual(display.text, "4", "Enter 4, display 4");
+      this.calc.Command("%");
+      assert.strictEqual(display.text, "75", "Enter %, display 75");
+    });
+
+  });
+
 });

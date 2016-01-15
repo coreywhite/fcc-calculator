@@ -96,12 +96,12 @@ Calculator.prototype.ClearDisplay = function() {
   this.allowAppend = true;
 };
 
-//Function to truncate a value
+//Function to truncate a value to the maximum number of digits
 Calculator.prototype.Truncate = function(value) {
   return Number(value.toFixed(this.maxDigits).slice(0, -1));
 };
 
-
+//Function to execute the current binary operation (+, -, *, or /)
 Calculator.prototype.ExecuteCurOp = function() {
   var curVal = this.Truncate(this.getValue());
   //Based on the operator, assign a default operand and operator function.
@@ -125,9 +125,7 @@ Calculator.prototype.ExecuteCurOp = function() {
     default:
       return false;
   }
-  //Apply the function and change the stored value. Multiplication must be
-  //handled differently because it stores the first operand rather than the
-  //second. So, e.g. "3 * 4 ="" stores "3 *"", whereas "3 + 4 ="" stores ""+ 4".
+  //Apply the function and change the stored value.
   if (this.curOp === "*") {
     var result = this.storedOp(curVal);
     this.storedVal = operand;
@@ -135,7 +133,6 @@ Calculator.prototype.ExecuteCurOp = function() {
     var result = this.storedOp(operand);
     this.storedVal = curVal;
   }
-
   this.setValue(this.Truncate(result));
   this.curOp = null;
 };
@@ -173,30 +170,27 @@ Calculator.prototype.Command = function(action) {
     case "7":
     case "8":
     case "9":
-      if(!this.allowAppend) {
-        this.storedVal = this.getValue();
-        this.ClearDisplay();
-      }
-      this.addDigit(parseInt(action));
-      this.allowAppend = true;
-      this.needsOperand = false;
-      break;
-
     case ".":
       if(!this.allowAppend) {
         this.storedVal = this.getValue();
         this.ClearDisplay();
       }
-      this.addDecimal()
+      if (action===".") {
+        this.addDecimal();
+      } else {
+        this.addDigit(parseInt(action));
+      }
       this.allowAppend = true;
       this.needsOperand = false;
       break;
 
-    //Handle unary operations:
+    //Handle negation:
     case "+/-":
       this.needsOperand = false;
       this.isNegative = !this.isNegative;
       break;
+
+    //Handle square roots:
     case "sqrt":
       if (!this.allowAppend) {
         this.storedVal = this.getValue();
@@ -229,6 +223,22 @@ Calculator.prototype.Command = function(action) {
         this.setValue(this.Truncate(this.storedOp(this.getValue())));
       }
       break;
+
+    //Handle the % key (note: currently only enabling for binary operations)
+    //TODO: % does not handle edge cases exactly like a true pocket calculator
+    case "%":
+      if (this.curOp && !this.needsOperand) {
+        if(this.curOp == "+" || this.curOp == "-") {
+          this.setValue(this.Truncate(this.getValue() * this.storedVal / 100));
+        } else {
+          this.setValue(this.Truncate(this.getValue() / 100));
+        }
+        this.ExecuteCurOp();
+        this.needsOperand = true;
+        this.allowAppend = false;
+      }
+      break;
+
   }
   this.Display();
 };

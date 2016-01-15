@@ -786,7 +786,7 @@ QUnit.module("Calculator Input Sequences", function(hooks) {
   });
 
   //Demonstrate operations with %
-  QUnit.module("Operators", function(hooks) {
+  QUnit.module("% Operator", function(hooks) {
 
     QUnit.test("Addition with %", function(assert) {
       assert.expect(4);
